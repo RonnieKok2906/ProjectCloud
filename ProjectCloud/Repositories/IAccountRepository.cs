@@ -1,11 +1,11 @@
-﻿using ProjectCloud.Models;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
-namespace ProjectCloud.Repositories
+namespace ProjectCloud
 {
     public interface IAccountRepository : IBaseRepository
     {
         Task<bool> InsertAccountToDBAsync(Account account);
         Task<Account> GetAccountFromDBAsync(string accountId);
+        Task<bool> DeleteAccountFromDBAsync(string accountId);
     }
 }

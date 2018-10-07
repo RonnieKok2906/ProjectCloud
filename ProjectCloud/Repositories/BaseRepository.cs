@@ -1,8 +1,7 @@
 ﻿using MongoDB.Driver;
-using ProjectCloud.Models;
 using System;
 
-namespace ProjectCloud.Repositories
+namespace ProjectCloud
 {
     public class BaseRepository: IBaseRepository
     {

@@ -1,15 +1,12 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
-using ProjectCloud.Models;
 using System;
 using System.Threading.Tasks;
 
-namespace ProjectCloud.Repositories
+namespace ProjectCloud
 {
     public class AccountsRepository : BaseRepository, IAccountRepository
     {
-        //private readonly IMongoCollection<Account> accountCollection;
-
         public AccountsRepository(string databaseName, string collectionName, string databaseUrl) : base(databaseName, collectionName, databaseUrl)
         {
 
@@ -37,6 +34,21 @@ namespace ProjectCloud.Repositories
             IAsyncCursor<Account> result = await this.accountCollection.FindAsync<Account>(filter);
 
             return result.FirstOrDefault();
+        }
+
+        public async Task<bool> DeleteAccountFromDBAsync(string accountId)
+        {
+            try
+            {
+                //ObjectId objectId = ObjectId.Parse(accountId);
+                await this.accountCollection.DeleteOneAsync<Account>(a => a.AccountId == accountId);
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

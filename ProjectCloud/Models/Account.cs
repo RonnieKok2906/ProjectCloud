@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace ProjectCloud.Models
+namespace ProjectCloud
 {
     public class Account
     {
