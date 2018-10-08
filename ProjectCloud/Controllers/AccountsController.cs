@@ -6,7 +6,7 @@ namespace ProjectCloud
     [Route("api/[controller]")]
     public class AccountsController : Controller
     {
-        private IAccountRepository accountRepository;
+        private IAccountsRepository accountRepository;
 
         public AccountsController()
         {
@@ -19,28 +19,28 @@ namespace ProjectCloud
         {
             if (account != null)
             {
-                if (await accountRepository.InsertAccountToDBAsync(account))
+                if (await accountRepository.InsertAccountAsync(account))
                 {
                     return StatusCode(201);
                 }
                 else
                 {
-                    return StatusCode(500);
+                    return StatusCode(500, "Cannot insert new account.");
                 }
             }
             else
             {
-                return StatusCode(400);
+                return StatusCode(400, "Invalid format.");
             }
         }
 
-        // GET: api/accounts/accountId=
-        [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] string accountId)
+        // GET: api/accounts
+        [HttpGet("{accountId}")]
+        public async Task<IActionResult> Get(string accountId)
         {
             if (!string.IsNullOrEmpty(accountId))
             {
-                Account account = await accountRepository.GetAccountFromDBAsync(accountId);
+                Account account = await accountRepository.GetAccountAsync(accountId);
 
                 if (account != null)
                 {
@@ -48,40 +48,54 @@ namespace ProjectCloud
                 }
                 else
                 {
-                    return StatusCode(404);
+                    return StatusCode(404, "Account not found.");
                 }
             }
             else
             {
-                return StatusCode(400);
+                return StatusCode(400, "No account id supplied.");
             }
-
         }
 
-        // PUT api/<controller>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
+        // PUT api/accounts
+        [HttpPut]
+        public async Task<IActionResult> Put([FromBody]Account account)
         {
-        }
-
-        // DELETE api/accounts/accountId=
-        [HttpDelete]
-        public async Task<IActionResult> Delete([FromQuery] string accountId)
-        {
-            if (!string.IsNullOrEmpty(accountId))
+            if (account != null)
             {
-                if (await accountRepository.DeleteAccountFromDBAsync(accountId))
+                if (await accountRepository.UpdateAccountAsync(account))
                 {
                     return StatusCode(202);
                 }
                 else
                 {
-                    return StatusCode(500);
+                    return StatusCode(500, "Cannot update account.");
                 }
             }
             else
             {
-                return StatusCode(400);
+                return StatusCode(400, "Invalid format.");
+            }
+        }
+
+        // DELETE api/accounts
+        [HttpDelete("{accountId}")]
+        public async Task<IActionResult> Delete(string accountId)
+        {
+            if (!string.IsNullOrEmpty(accountId))
+            {
+                if (await accountRepository.DeleteAccountAsync(accountId))
+                {
+                    return StatusCode(202);
+                }
+                else
+                {
+                    return StatusCode(500, "Cannot delete account.");
+                }
+            }
+            else
+            {
+                return StatusCode(400, "No account id supplied.");
             }
         }
     }

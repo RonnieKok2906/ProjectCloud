@@ -5,48 +5,101 @@ using System.Threading.Tasks;
 
 namespace ProjectCloud
 {
-    public class AccountsRepository : BaseRepository, IAccountRepository
+    public class AccountsRepository : BaseRepository, IAccountsRepository
     {
         public AccountsRepository(string databaseName, string collectionName, string databaseUrl) : base(databaseName, collectionName, databaseUrl)
         {
 
         }
 
-        public async Task<bool> InsertAccountToDBAsync(Account account)
+        public async Task<bool> InsertAccountAsync(Account account)
         {
             try
             {
+                account.ID = ObjectId.GenerateNewId();
                 account.AccountId = $"{Guid.NewGuid().ToString()}";
                 await this.accountCollection.InsertOneAsync(account);
+
+                return true;
             }
-            catch
+            catch (Exception e)
             {
+                System.Diagnostics.Debug.WriteLine(e.Message);
                 return false;
             }
-
-            return true;
         }
 
-        public async Task<Account> GetAccountFromDBAsync(string accountId)
+        public async Task<Account> GetAccountAsync(string accountId)
         {
-            BsonDocument filter = new BsonDocument("account_id", accountId);
+            try
+            {
+                BsonDocument filter = new BsonDocument("account_id", accountId);
 
-            IAsyncCursor<Account> result = await this.accountCollection.FindAsync<Account>(filter);
+                IAsyncCursor<Account> result = await this.accountCollection.FindAsync<Account>(filter);
 
-            return result.FirstOrDefault();
+                return result.FirstOrDefault();
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+                return null;
+            }
         }
 
-        public async Task<bool> DeleteAccountFromDBAsync(string accountId)
+        public async Task<bool> UpdateAccountAsync(Account account)
+        {
+            try
+            {
+                Account accountFromDB = await this.GetAccountAsync(account.AccountId);
+
+                if (accountFromDB != null)
+                {
+                    account.ID = accountFromDB.ID;
+
+                    FilterDefinition<Account> filter = Builders<Account>.Filter.Eq(a => a.AccountId, account.AccountId);
+
+                    ReplaceOneResult result = await accountCollection.ReplaceOneAsync(filter, account);
+
+                    if (result.IsAcknowledged)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteAccountAsync(string accountId)
         {
             try
             {
                 //ObjectId objectId = ObjectId.Parse(accountId);
-                await this.accountCollection.DeleteOneAsync<Account>(a => a.AccountId == accountId);
+                DeleteResult result = await this.accountCollection.DeleteOneAsync<Account>(a => a.AccountId == accountId);
 
-                return true;
+                if (result.IsAcknowledged)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
-            catch
+            catch (Exception e)
             {
+                System.Diagnostics.Debug.WriteLine(e.Message);
                 return false;
             }
         }
